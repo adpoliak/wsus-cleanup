@@ -1,9 +1,7 @@
 <#
-
     WSUS Cleanup Script
     Last updated 11-26-2019
     Please view readme for more info and updates: https://github.com/samersultan/wsus-cleanup
-
 #>
 
 param([switch]$Elevated)
@@ -29,25 +27,18 @@ exit
 
 
 <#
-
     WSUS-CLEANUP-UPDATES
     
     Runs WSUS cleanup task using stored procedures in WSUS database
     thus avoiding timeout errors that may occur when running WSUS Cleanup Wizard.
-
     The script is intended to run as a scheduled task on WSUS server
     but can also be used remotely. $SqlServer and $SqlDB variables 
     must be defined before running the script on a server without WSUS.
-
     Version 4
-
     Version history:
-
     4    Added database connection state check before deleting an 
          unused update: the script will now attempt to reestablish
          connection if broken.
-
-
 #>
 
 
@@ -246,6 +237,26 @@ function DeleteInactiveComputers( $DbConn ){
 
 ###################
 
+function DeleteSynchronisations( $DbConn ){
+
+    log "Removing Synchronisations" 1 "Information"
+    
+    $Command = New-Object System.Data.SQLClient.SQLCommand 
+    $Command.Connection = $dbconn 
+    $Command.CommandTimeout = 1800
+    $Command.CommandText = "DELETE FROM tbEventInstance WHERE EventNamespaceID = '2' AND EVENTID IN ('381', '382', '384', '386', '387', '389') AND DATEDIFF(month, TimeAtServer, CURRENT_TIMESTAMP) >= 1"
+    try{
+        $Command.ExecuteNonQuery() | Out-Null
+    }
+    catch{
+        $script:errorCount++
+        log "Exception removing Synchronisations:`n$_" 99 "Error"
+    }
+
+}
+
+###################
+
 function CompressUpdates{
 
     log "Compressing updates" 1 "Information"
@@ -320,6 +331,7 @@ try{
         DeclineSupersededUpdates $Conn
         DeleteObsoleteUpdates $Conn
         DeleteInactiveComputers $Conn
+		DeleteSynchronisations $Conn
         RestartWsusService   
         if ( ! $SkipFileCleanup ) {  
             DeleteUnneededContent 
