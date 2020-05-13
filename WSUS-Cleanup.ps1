@@ -1,6 +1,6 @@
 <#
     WSUS Cleanup Script
-    Last updated 11-26-2019
+    Last updated 05-13-2020
     Please view readme for more info and updates: https://github.com/samersultan/wsus-cleanup
 #>
 
@@ -273,13 +273,21 @@ function CompressUpdates{
 
 ###################
 
+function Get-ScriptDirectory {
+    Split-Path -parent $PSCommandPath
+}
+
+###################
+
 function RebuildDBIndexes{
 
     log "Rebuilding DB Indexes" 1 "Information"
 
     try{
         Import-Module UpdateServices
-        $status = SQLCMD -S \\.\pipe\Microsoft##WID\tsql\query -i $SQLPath -I 
+        $SqlScript = Get-ScriptDirectory
+        $SqlScript = "$SqlScript\$SQLPath" 
+        $status = SQLCMD -S \\.\pipe\Microsoft##WID\tsql\query -i "$SqlScript" -I 
         log "Done Rebuilding DB Indexes: $status" 1 "Information"
     }
     catch{
