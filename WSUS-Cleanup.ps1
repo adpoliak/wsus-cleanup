@@ -1,7 +1,7 @@
 <#
     WSUS Cleanup Script
     Last updated 05-13-2020
-    Please view readme for more info and updates: https://github.com/samersultan/wsus-cleanup
+    Please view readme for more info and updates: https://github.com/neeral85/wsus-cleanup
 #>
 
 param([switch]$Elevated)
