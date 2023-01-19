@@ -288,9 +288,9 @@ function RebuildDBIndexes{
         $SqlScript = Get-ScriptDirectory
         $SqlScript = "$SqlScript\$SQLPath" 
         if ( $script:SqlServer -match "microsoft##" ){
-            $status = SQLCMD -S \.\pipe\Microsoft##WID\tsql\query -i $SQLPath -I
+            $status = SQLCMD -S \.\pipe\Microsoft##WID\tsql\query -i $SqlScript -I
         } else {
-            $status = SQLCMD -S $script:SqlServer -i $SQLPath -I
+            $status = SQLCMD -S $script:SqlServer -i $SqlScript -I
         } 
         log "Done Rebuilding DB Indexes: $status" 1 "Information"
     }
@@ -343,7 +343,7 @@ try{
         DeclineSupersededUpdates $Conn
         DeleteObsoleteUpdates $Conn
         DeleteInactiveComputers $Conn
-		DeleteSynchronisations $Conn
+	DeleteSynchronisations $Conn
         RestartWsusService   
         if ( ! $SkipFileCleanup ) {  
             DeleteUnneededContent 
