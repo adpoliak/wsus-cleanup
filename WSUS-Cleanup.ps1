@@ -287,7 +287,11 @@ function RebuildDBIndexes{
         Import-Module UpdateServices
         $SqlScript = Get-ScriptDirectory
         $SqlScript = "$SqlScript\$SQLPath" 
-        $status = SQLCMD -S \\.\pipe\Microsoft##WID\tsql\query -i "$SqlScript" -I 
+        if ( $script:SqlServer -match "microsoft##" ){
+            $status = SQLCMD -S \.\pipe\Microsoft##WID\tsql\query -i $SQLPath -I
+        } else {
+            $status = SQLCMD -S $script:SqlServer -i $SQLPath -I
+        } 
         log "Done Rebuilding DB Indexes: $status" 1 "Information"
     }
     catch{
